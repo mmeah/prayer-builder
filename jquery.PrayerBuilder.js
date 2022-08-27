@@ -1,10 +1,12 @@
 /**
  * @author Mohammed Meah 
  * @email mmeah2 (@at@) gmail (.dot.) com
- * @version 0.9.5
- * Updated Nov 01, 2015
+ * @version 1.0.0
+ * Updated Aug 27, 2022
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/mit-license.php
+ * 
+ * @source https://github.com/mmeah/prayer-builder
  *
  */
 	
