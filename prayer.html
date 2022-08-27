@@ -1,0 +1,394 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<title></title>
+		<meta content="IE=9; IE=8; IE=7" http-equiv="X-UA-Compatible">
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script src="jquery.MyDigitClock.js"></script>
+		<script src="jquery.PrayerBuilder.js"></script>
+
+		<!-- include flatWeatherPlugin.css -->
+		<link href="css/flatWeatherPlugin.css" rel="stylesheet">
+		<link href="css/flatWeatherPluginNight.css" rel="stylesheet">
+		<!-- include flatWeatherPlugin.js -->
+		<script src="jquery.flatWeatherPlugin.min.js"></script>  
+		
+		<script type="text/javascript">
+			var one_sec= 1000;
+			var one_min= one_sec*60;
+			var one_hour= one_min*60;
+			var timetable_ajax=[];
+			setInterval(myRefreshFunction, one_min*10);
+			setInterval(myAbsoluteBrowserRefreshFunction, one_min*10);
+
+			function tomorrowIqamah(){
+					try{
+						var tomorrow_message="";
+						$(timetable_ajax).each(function(index){
+							if(this[1]!=this[2] && index<6 && index!=4){
+								if(tomorrow_message==""){
+									tomorrow_message="Tomorrow: ";
+								}else{
+									tomorrow_message+=", ";
+								}
+								tomorrow_message+=this[3];
+							}
+						});
+						$("#iqamah_tomorrow").text(tomorrow_message);
+						if(tomorrow_message==""){
+							$("#messages_yellow").hide();
+							$("#iqamah_tomorrow").hide();
+
+						}else{
+							$("#messages_yellow").show();
+							$("#iqamah_tomorrow").show();
+						}
+					}catch(e){
+						$("#messages_yellow").hide();
+						$("#iqamah_tomorrow").hide();
+						if(console && console.log) console.log(e);
+					}
+			}
+			
+			function myRefreshFunction(){
+				document.getElementById('prayer_frame').src=document.getElementById('prayer_frame').src;
+				
+				var d = new Date();
+				$('#radar').css('background-image', "url('http://sirocco.accuweather.com/nx_mosaic_640x480_public/sir/inmasirmr_ord.gif')");
+				
+				timetable_ajax=$("#timetable_ajax").PrayerBuilder({
+					'url':'//spreadsheets.google.com/feeds/list/0ApHK2KAGec6cdHEwRW5XSHVVWXQ1eTYxa3VjT2swbGc/od7/public/values?alt=json'+'&random='+Math.random()
+				});
+				setTimeout(function() {tomorrowIqamah();}, 2*one_sec);
+			}
+			function myAbsoluteBrowserRefreshFunction(){
+				window.location.reload();
+				window.location.href=window.location.href;
+			}
+			$(document).ready(function(){
+				$("#digital_clock").MyDigitClock({
+					fontSize:100, 
+					fontFamily:"Century gothic", 
+					fontColor: "#000", 
+					fontWeight:"bold", 
+					bAmPm:true,
+					background:'#fff',
+					bShowHeartBeat:true
+				});
+				myRefreshFunction();
+
+				setInterval( function() {
+					if(timetable_ajax.length==0) return;
+
+					try{
+
+						var now = new Date();
+						var yyyy=now.getFullYear();
+						var mm=now.getMonth();
+						var dd=now.getDate();
+						
+						var hour1=timetable_ajax[1][0].split(":")[0]; // Always AM
+						var min1=timetable_ajax[1][0].split(":")[1].split(" ")[0];
+						var makruh1_start=new Date(yyyy,mm,dd,hour1,min1,"00","00");
+						var makruh1_end=new Date(makruh1_start.getTime() +  15*one_min);
+						
+						var hour2=timetable_ajax[2][0].split(":")[0]; // Can be either AM or PM
+						var min2=timetable_ajax[2][0].split(":")[1].split(" ")[0];
+						var hour2AMPM = timetable_ajax[2][0].split(":")[1].split(" ")[1];
+						var makruh2_end=new Date(yyyy,mm,dd,hour2,min2,"00","00");
+						if(hour2AMPM == "PM") makruh2_end = new Date(makruh2_end.getTime()+ 12*60*one_min);
+						var makruh2_start=new Date(makruh2_end.getTime() -  5*one_min);
+						
+						var hour3=timetable_ajax[4][0].split(":")[0]; // Always PM
+						var min3=timetable_ajax[4][0].split(":")[1].split(" ")[0];
+						var makruh3_end= new Date(yyyy,mm,dd,hour3,min3,"00","00");
+						makruh3_end = new Date(makruh3_end.getTime()+ 12*60*one_min);
+						var makruh3_start=new Date(makruh3_end.getTime() -  10*one_min);
+						//if(console && console.log) console.log("A",timetable_ajax[2], yyyy,mm,dd,hour2,min2,"00","00", makruh2_start, now, makruh2_start<=now , now<makruh2_end);
+						//if(console && console.log) console.log("B", makruh1_start, now, makruh1_end, makruh2_start, makruh2_end, makruh3_start, makruh3_end );
+						//if(console && console.log) console.log("C",makruh3_start, makruh3_end , now, (makruh3_start<=now && now<makruh3_end) );
+						//if(console && console.log) console.log("D",(makruh1_start<=now && now<makruh1_end)  , (makruh2_start<=now && now<makruh2_end) , (makruh3_start<=now && now<makruh3_end) );
+						//if( (makruh1_start<=now && now<makruh1_end) || (makruh2_start<=now && now<makruh2_end) || (makruh3_start<=now && now<makruh3_end) ){
+						//	$("#messages_red").fadeIn(2*one_sec);
+						//	$("#makruh").fadeIn(2*one_sec);
+						//}else{
+						//	$("#messages_red").fadeOut(5*one_sec);
+						//	$("#makruh").fadeOut(5*one_sec);
+						//}						
+
+					}catch(e){
+						$("#messages_red").hide();
+						$("#makruh").hide();
+						if(console && console.log) console.log(e);
+					}
+				}, 5*one_sec );	
+						
+				setTimeout(function() {weatherTodayLoad();}, 3*one_sec );
+				setTimeout(function() {weatherForcastLoad();}, 3*one_sec );
+				
+				function weatherTodayLoad(){
+					if(timetable_ajax.length==0){
+						return;
+						setTimeout(function() {weatherTodayLoad();}, 3*one_sec );
+					}
+					
+					//Setup the plugin, see readme for more examples
+					var weather_today = $("#weather_today").flatWeatherPlugin({
+					  location: "Lombard, IL", //city and region *required 
+					  country: "USA",         //country *required 
+					  //optional:
+					  api: "openweathermap", //default: openweathermap (openweathermap or yahoo)
+					  apikey: "5e71688b440e2134d6a0cdf019c31259",   //optional api key for openweather
+					  //view : "simple", //default: full (partial, full, simple, today or forecast)
+					  displayCityNameOnly : true, //default: false (true/false) if you want to display only city name
+					  forecast: 4, //default: 5 (0 -5) how many days you want forecast
+					  render: true, //default: true (true/false) if you want plugin to generate markup
+					  loadingAnimation: true //default: true (true/false) if you want plugin to show loading animation
+					});
+					weather_today.flatWeatherPlugin('fetchWeather').then(weather_today_success, weather_today_fail);
+				}
+
+				function weather_today_success(data) {
+					if(window.weather_codes){
+						if(window.weather_codes.indexOf(data.today.code)>=0 || window.weather_codes.indexOf("-1")>=0 ){
+							if(console) console.log("Code",data.today.code," | Codes",window.weather_codes);
+							$("#clock").css("visibility","hidden");
+							$("#radar").parent().show();
+							setTimeout(function() {weatherTodayLoad();}, 30*one_sec );
+							setInterval(myAbsoluteBrowserRefreshFunction, one_min*5);
+						}else{
+							$("#radar").parent().hide();
+							$("#clock").css("visibility","visible");
+						};
+					}
+				}
+				
+				function weather_today_fail(data) {
+					if(console) console.log('fail', data);
+				}				
+				
+				function weatherForcastLoad(){
+					var weather_forcast = $("#weather_forcast").flatWeatherPlugin({
+					  location: "Lombard, IL", //city and region *required 
+					  country: "USA",         //country *required 
+					  //optional:
+					  api: "openweathermap", //default: openweathermap (openweathermap or yahoo)
+					  apikey: "5e71688b440e2134d6a0cdf019c31259",   //optional api key for openweather
+					  //view : "forecast", //default: full (partial, full, simple, today or forecast)
+					  displayCityNameOnly : true, //default: false (true/false) if you want to display only city name
+					  forecast: 4, //default: 5 (0 -5) how many days you want forecast
+					  render: true, //default: true (true/false) if you want plugin to generate markup
+					  loadingAnimation: true //default: true (true/false) if you want plugin to show loading animation
+					  //units : "metric" or "imperial" default: "auto"
+					});
+					weather_forcast.flatWeatherPlugin('fetchWeather').then(weather_forcast_success, weather_forcast_fail);
+					function weather_forcast_success(data) {
+						setTimeout(function() {
+							$("#weather_forcast .wiDay .wiMax").prepend("H:");
+							$("#weather_forcast .wiDay .wiMin").prepend("L:");
+							$("#weather_forcast .wiDay:odd").css("background","#f3f3f3");
+							$("#weather_forcast .wiDay").css("border-bottom","1px solid #b7b7b7");
+							$("#weather_today").removeClass("day night night-alt").addClass(window.time_of_day);
+						},1*one_sec);
+					} 
+
+					function weather_forcast_fail(data) {
+						if(console) console.log('error', data);
+					}
+					
+				}
+
+			});
+		</script>
+
+		<style>
+			#weather_today .wiTemperature{
+				margin: -19px -30px -20px 20px;
+				font-size: 85px;
+			 }
+
+			#weather_today h2,#weather_forcast h2{
+				display:none;
+			}
+			#weather_forcast .wi:before, #weather_forcast .wi:after{
+				line-height: 1.5;
+			}
+			#weather_today .wiToday .wiIconGroup{
+				margin-top:10px;
+			}
+			#weather_today .wiToday .wiIconGroup .wi{
+				font-size: 45px;
+			}
+			#weather_today .wiToday .wiText{
+				margin-top: 5px;
+			}
+			#weather_forcast ul.wiForecasts{
+				margin-bottom: -6px;
+			}
+			#weather_forcast ul.wiForecasts li.wiDay{
+				padding: 0px;
+			}
+			
+		</style>
+		
+		<style type="text/css">
+			body { cursor: none !important; }
+		</style>
+		<style type="text/css">
+			* {
+				margin: 0;
+				padding: 0;
+			}
+			
+			#clock {
+				position: relative;
+				width: 600px;
+				height: 600px;
+				margin: -20px auto 0 auto;
+				background: url(clockface.jpg);
+				list-style: none;
+				z-index: -1;
+				}
+			
+			#sec, #min, #hour {
+				position: absolute;
+				width: 30px;
+				height: 600px;
+				top: 0px;
+				left: 285px;
+				}
+			
+			#sec {
+				background: url(sechand.png);
+				z-index: 3;
+				}
+			   
+			#min {
+				background: url(minhand.png);
+				z-index: 2;
+				}
+			   
+			#hour {
+				background: url(hourhand.png);
+				z-index: 1;
+				}
+				
+			p {
+				text-align: center; 
+				padding: 10px 0 0 0;
+				}
+			body,html{
+				overflow:hidden;
+			}
+		</style>
+		
+		<script type="text/javascript">
+		
+			$(document).ready(function() {
+			    // Clock Ticker
+				setInterval( function() {
+				  var seconds = new Date().getSeconds();
+				  var sdegree = seconds * 6;
+				  var milliseconds = new Date().getMilliseconds();
+				  //if(milliseconds>500) sdegree += 3;
+				  //if(milliseconds>0  ) sdegree += 1;
+				  //if(milliseconds>200) sdegree += 1;
+				  //if(milliseconds>400) sdegree += 1;
+				  //if(milliseconds>600) sdegree += 1;
+				  //if(milliseconds>800) sdegree += 1;
+				  //if(milliseconds>900) sdegree += 1; 
+				  var srotate = "rotate(" + sdegree + "deg)";
+				  
+				  $("#sec").css({"-moz-transform" : srotate, "-webkit-transform" : srotate});
+				  
+				}, 1000 );
+				
+			    
+				setInterval( function() {
+				  var hours = new Date().getHours();
+				  var mins = new Date().getMinutes();
+				  var hdegree = hours * 30 + (mins / 2);
+				  var hrotate = "rotate(" + hdegree + "deg)";
+				  
+				  $("#hour").css({"-moz-transform" : hrotate, "-webkit-transform" : hrotate});
+				  
+				}, 1000 );
+			    
+			    
+				setInterval( function() {
+				  var mins = new Date().getMinutes();
+				  var mdegree = mins * 6;
+				  var mrotate = "rotate(" + mdegree + "deg)";
+				  
+				  $("#min").css({"-moz-transform" : mrotate, "-webkit-transform" : mrotate});
+				  
+				}, 1000 );
+				if(/chrom(e|ium)|firefox|msie/.test(navigator.userAgent.toLowerCase())){
+					// show id='rotation'
+				}else{
+					$("#rotation").hide();
+				}
+			}); 
+		
+		</script>
+
+			
+	</head>
+	<body style="min-width:1500px;">
+		<!--<div id='rotation' style="z-index: 8;position: fixed; text-align:center; top:25px; left:15px">
+			<img style="width:85%;" src="https://dl.dropboxusercontent.com/u/93197554/rotation.gif" onerror="$(this).hide()">
+		</div>-->
+		<div id="messages_red" style="display:none;position: fixed; width: 100%; z-index: 5; height: 100%; background: none repeat scroll 0px 0px rgba(200, 0, 0, 0.35);">
+			<span id="makruh" style="display:none;position: fixed; color: white; font-size: 116px; left:240px; top:243px; text-shadow: 4px 7px 5px rgb(0, 0, 0);">Makruh time to pray</span>
+		</div>
+		<div id="messages_yellow" style="display:none;position: fixed; width: 100%; z-index: 7; height: 90px; background: none repeat scroll 0px 0px rgba(255, 255, 0, 0.35);">
+			<span id="iqamah_tomorrow" style="display:none;position: fixed; color: red; font-size: 56px; text-align:center; top:30px; white-space:nowrap; width: 100%;">Tomorrow:</span>
+		</div>
+		<div style="position: absolute; left: 75px; top: 100px; display:none;">
+			<div id="radar" class="map-large" style="background-image:url('http://sirocco.accuweather.com/nx_mosaic_640x480_public/sir/inmasirmr_ord.gif'); width:640px; height:480px;">
+				<div class="map-metro-layer" style="background-image:url('overlay.png'); width:640px; height:480px; position: absolute;"></div>
+				<!--
+				<div class="map-metro-layer" style="background-image:url('http://vortex.accuweather.com/adc2010/images/radar/metrolayers/roads/ord_6x4_roads.gif'); width:640px; height:480px; position: absolute;"></div>
+				<div class="map-metro-layer" style="background-image:url('http://vortex.accuweather.com/adc2010/images/radar/metrolayers/markers/ord_6x4_int.gif'); width:640px; height:480px; position: absolute;"></div>
+				<div class="map-metro-layer" style="background-image:url('http://vortex.accuweather.com/adc2010/images/radar/metrolayers/cities/ord_6x4_cities.gif'); width:640px; height:480px; position: absolute;"></div>                
+				-->
+				<div class="map-key" style="position:absolute;top:450px;">
+					<img src="http://vortex.accuweather.com/adc2010/images/keys/radarsirf.png">
+				</div>
+			</div>
+		</div>		
+		<br><br>
+		<table class="top_frame" style="margin:auto;padding:0px;width:350px;">
+			<tr><td>
+				<ul id="clock" style="Xvisibility:Xhidden;">	
+					<li id="sec"></li>
+					<li id="hour"></li>
+					<li id="min"></li>
+				</ul>
+				<table style="margin-top: -6px; margin-bottom:-6px">
+					<tr>
+						<td width="55%">
+							<div id="weather_today"></div>
+						</td>
+						<td>
+							<div id="weather_forcast"></div>
+						</td>
+					</tr>
+				</table>
+				<div id="digital_clock" style="text-align:center;white-space:nowrap"></div>
+			</td>
+			<td>
+				<br><br><br>
+				<iframe style="margin:auto;" id='prayer_frame' frameborder='0' width='675px' height='810px' scrolling="no" style="overflow: hidden"  src='https://docs.google.com/spreadsheet/pub?key=0ApHK2KAGec6cdHEwRW5XSHVVWXQ1eTYxa3VjT2swbGc&single=true&gid=1&range=E10%3AG21&output=html&widget=false&embed=true&embedded=true'>
+				</iframe>
+			</td></tr>
+			<!--<tr><td>
+				<div id="Xdigital_clock" style="text-align:center;white-space:nowrap;margin-top:55px"></div>
+			</td>
+			<td>Place holder
+			</td>
+			</tr>-->
+		</table>
+		<div id="timetable_ajax" style="display:none;"></div>
+	</body>
+</html>
