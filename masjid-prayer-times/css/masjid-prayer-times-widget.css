@@ -1,0 +1,27 @@
+.prayer-times-widget {
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.prayer-times-widget h3 { /* Widget Title - usually handled by theme */
+    /* margin-top: 0; */
+}
+.prayer-times-widget h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+}
+.prayer-times-widget ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+.prayer-times-widget ul li {
+    padding: 3px 0;
+}
+.prayer-times-widget .prayer-date {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 10px;
+}
