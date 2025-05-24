@@ -1,0 +1,29 @@
+/* Styles for Nisab Calculator Widget */
+#nisab_content {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+#nisab_content td {
+    padding: 6px 4px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+#nisab_content tr:last-child td {
+    border-bottom: none;
+}
+
+/* #nisab_content td:first-child {} */ /* Label column, already bolded by <strong> */
+
+/* #nisab_content td:last-child {} */ /* Value column, text-align: right is handled inline in widget PHP for now */
+/* Re-adding text-align for consistency via CSS if preferred over inline style */
+#nisab_content td:nth-child(2) { /* Target the second cell of each row (value cell) */
+     text-align: right;
+}
+
+
+#nisab_content small {
+    font-size: 0.9em;
+    color: #555;
+}

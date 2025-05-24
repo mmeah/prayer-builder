@@ -20,16 +20,19 @@ if ( ! defined( 'WPINC' ) ) {
 // Include API functions.
 require_once plugin_dir_path( __FILE__ ) . 'includes/api-functions.php';
 
-// Include the widget class.
+// Include the widget classes.
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-masjid-prayer-times-widget.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-masjid-nisab-widget.php';
 
-// Register the widget.
-function register_masjid_prayer_times_widget() {
+// Register the widgets.
+function masjid_prayer_times_register_widgets() { // Renamed for clarity as it now registers multiple widgets
     register_widget( 'Masjid_Prayer_Times_Widget' );
+    register_widget( 'Masjid_Nisab_Widget' );
 }
-add_action( 'widgets_init', 'register_masjid_prayer_times_widget' );
+add_action( 'widgets_init', 'masjid_prayer_times_register_widgets' );
 
 // Enqueue plugin stylesheet.
+// No changes needed here for widget registration.
 function masjid_prayer_times_enqueue_styles() {
     wp_enqueue_style(
         'masjid-prayer-times-widget-style', // Handle

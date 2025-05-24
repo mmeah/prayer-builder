@@ -49,4 +49,78 @@ function masjid_prayer_times_fetch_data( $masjid_id ) {
 
     return $data['data'];
 }
+
+/**
+ * Fetches the live silver price from Lear Capital.
+ *
+ * @return array|WP_Error An array with 'price' (float) and 'date' (string) on success, or WP_Error on failure.
+ */
+function masjid_nisab_fetch_silver_price() {
+    $api_url = 'http://www.learcapital.com/charts/generated/silver_daily.json';
+    $timeout = 15; // seconds
+
+    $response = wp_remote_get( $api_url, array( 'timeout' => $timeout ) );
+
+    if ( is_wp_error( $response ) ) {
+        return $response;
+    }
+
+    $response_code = wp_remote_retrieve_response_code( $response );
+    if ( $response_code !== 200 ) {
+        return new WP_Error( 'api_error', sprintf( __( 'Failed to fetch silver price data: HTTP Error %s', 'masjid-prayer-times' ), $response_code ) );
+    }
+
+    $body = wp_remote_retrieve_body( $response );
+    if ( empty( $body ) ) {
+        return new WP_Error( 'empty_response', __( 'API returned an empty response for silver price.', 'masjid-prayer-times' ) );
+    }
+
+    // Strip JSONP wrapper
+    $start_pos = strpos( $body, '(' );
+    $end_pos = strrpos( $body, ')' );
+
+    if ( $start_pos === false || $end_pos === false || $start_pos >= $end_pos ) {
+        return new WP_Error( 'jsonp_parse_error', __( 'Invalid JSONP format for silver price data.', 'masjid-prayer-times' ) );
+    }
+
+    $json_str = substr( $body, $start_pos + 1, $end_pos - $start_pos - 1 );
+
+    if ( empty( $json_str ) ) {
+        return new WP_Error( 'jsonp_parse_error', __( 'Empty JSON content after stripping JSONP wrapper for silver price.', 'masjid-prayer-times' ) );
+    }
+
+    $data = json_decode( $json_str ); // Decode as object
+
+    if ( $data === null && strtolower( $json_str ) !== 'null' ) {
+        return new WP_Error( 'json_decode_error', __( 'Error decoding silver price JSON: ', 'masjid-prayer-times' ) . json_last_error_msg() );
+    }
+
+    // Extract silver price
+    if ( ! is_object( $data ) || ! property_exists( $data, 'columnValues' ) || ! is_array( $data->columnValues ) || empty( $data->columnValues ) ) {
+        return new WP_Error( 'data_format_error', __( 'Unexpected data structure for silver price: Missing or invalid columnValues.', 'masjid-prayer-times' ) );
+    }
+
+    $last_entry_index = count( $data->columnValues ) - 1;
+    if ( ! isset( $data->columnValues[ $last_entry_index ] ) || ! is_array( $data->columnValues[ $last_entry_index ] ) || count( $data->columnValues[ $last_entry_index ] ) < 2 ) {
+        return new WP_Error( 'data_format_error', __( 'Unexpected data structure for silver price: Invalid last entry in columnValues.', 'masjid-prayer-times' ) );
+    }
+
+    $silver_price_raw = $data->columnValues[ $last_entry_index ][1];
+    $silver_price = floatval( $silver_price_raw );
+
+    // Extract generatedOn date
+    $generated_on_date = null;
+    if ( property_exists( $data, 'generatedOn' ) && ! empty( $data->generatedOn ) ) {
+        $generated_on_date = sanitize_text_field( $data->generatedOn );
+    } else {
+        // Fallback to current date if generatedOn is not available
+        $generated_on_date = current_time( 'mysql', true ); // GMT
+        // Or, if you prefer just date part: current_time( 'Y-m-d', true );
+    }
+    
+    return array(
+        'price' => $silver_price,
+        'date'  => $generated_on_date,
+    );
+}
 ?>
