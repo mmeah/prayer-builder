@@ -1,0 +1,56 @@
+.prayer-times-widget {
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.prayer-times-widget h3 { /* Widget Title - usually handled by theme */
+    /* margin-top: 0; */
+}
+.prayer-times-widget h4 {
+    margin-top: 15px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 5px;
+}
+.prayer-times-widget ul {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+}
+.prayer-times-widget ul li {
+    padding: 3px 0;
+}
+.prayer-times-widget .prayer-date {
+    font-style: italic;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+/* Styles for Nisab Calculator Widget */
+#nisab_content {
+    width: 100%; /* Make table take full widget width */
+    border-collapse: collapse; /* Clean look for borders if any are added */
+    margin-top: 10px; /* Space above the table */
+}
+
+#nisab_content td {
+    padding: 6px 4px; /* Padding within cells */
+    border-bottom: 1px solid #f0f0f0; /* Light line between rows */
+}
+
+#nisab_content tr:last-child td {
+    border-bottom: none; /* No line under the last row (Updated date) */
+}
+
+#nisab_content td:first-child { /* Typically the label column */
+    /* font-weight: bold; // Already using <strong> in HTML */
+}
+
+#nisab_content td:last-child { /* Typically the value column */
+    text-align: right; /* Align values to the right */
+}
+
+#nisab_content small {
+    font-size: 0.9em;
+    color: #555;
+}
